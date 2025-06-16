@@ -66,32 +66,30 @@ WHERE r.scheduled_date = CURRENT_DATE
 AND r.email_sent = false;
 ```
 
-### 4. **Set Up Environment Variables**
+### 4. **Test Email Microservice Directly**
 
-Make sure these are configured in your Supabase Edge Functions settings:
-
-1. Go to **Settings** → **Edge Functions** in Supabase Dashboard
-2. Add these environment variables:
-   - `MAILJET_API_KEY` - Your Mailjet API key
-   - `MAILJET_SECRET_KEY` - Your Mailjet secret key
-
-### 5. **Test Email Functionality**
-
-You can test Mailjet directly:
+You can test your email microservice directly:
 
 ```bash
-# Replace with your actual Mailjet credentials
-curl -X POST https://api.mailjet.com/v3.1/send \
-  -H "Authorization: Basic $(echo -n 'YOUR_API_KEY:YOUR_SECRET_KEY' | base64)" \
+curl -X POST https://deploy-send-email.onrender.com/send \
   -H "Content-Type: application/json" \
   -d '{
-    "Messages": [{
-      "From": {"Email": "noreply@eduvantage.com", "Name": "EduVantage"},
-      "To": [{"Email": "your-test-email@example.com", "Name": "Test User"}],
-      "Subject": "Test Email from EduVantage",
-      "HTMLPart": "<h1>Test Email</h1><p>This is a test email from EduVantage deadline reminder system.</p>"
-    }]
+    "to": "your-test-email@example.com",
+    "subject": "⏰ Test Reminder - EduVantage",
+    "html": "<h1>Test Email</h1><p>This is a test email from EduVantage deadline reminder system.</p><p>If you receive this, the email microservice is working correctly!</p>"
   }'
+```
+
+Expected response:
+```json
+{
+  "success": true,
+  "message": "Email sent successfully!",
+  "details": {
+    "to": "your-test-email@example.com",
+    "status": "accepted"
+  }
+}
 ```
 
 ## 🔧 **Setting Up Automated Reminders**
@@ -146,15 +144,21 @@ When you add a new application deadline:
 - Action items checklist
 - Personalized content
 - Reminder type explanation
+- **Now powered by your email microservice!**
 
 ## 🚨 **Troubleshooting**
 
 ### Common Issues:
 
-1. **No emails sent**: Check Mailjet credentials and account status
-2. **Function errors**: Check Supabase function logs
+1. **No emails sent**: 
+   - Check if your email microservice is running: `https://deploy-send-email.onrender.com/send`
+   - Verify Mailjet credentials in your microservice environment
+   
+2. **Function errors**: Check Supabase function logs for detailed error messages
+
 3. **No reminders created**: Verify database triggers are working
-4. **Wrong dates**: Check timezone settings
+
+4. **Microservice errors**: Check your Render deployment logs
 
 ### Debug Commands:
 
@@ -169,4 +173,26 @@ FROM information_schema.routines
 WHERE routine_name LIKE '%deadline%';
 ```
 
-The system is now properly configured and should automatically send reminder emails based on your application deadlines!
+### Test Microservice Health:
+
+```bash
+# Check if microservice is responding
+curl -X GET https://deploy-send-email.onrender.com/health
+
+# Or test with a simple ping
+curl -X POST https://deploy-send-email.onrender.com/send \
+  -H "Content-Type: application/json" \
+  -d '{"to":"test@example.com","subject":"Test","html":"<p>Test</p>"}'
+```
+
+## 🔄 **Integration Benefits**
+
+By using your email microservice:
+
+1. **Reliability**: Dedicated service for email handling
+2. **Scalability**: Independent scaling of email functionality  
+3. **Maintainability**: Centralized email logic
+4. **Monitoring**: Better error tracking and logging
+5. **Flexibility**: Easy to update email templates and logic
+
+The system now uses your microservice at `https://deploy-send-email.onrender.com/send` for all email delivery, making it more robust and easier to manage!

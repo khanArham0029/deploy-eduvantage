@@ -14,79 +14,44 @@ interface EmailData {
 }
 
 /**
- * Sends an email via Mailjet API
+ * Sends an email via the external email microservice
  * @param {Object} emailData - Contains `to`, `subject`, and `html`
  * @returns {boolean} true if successful, false otherwise
  */
 async function sendEmail(emailData: EmailData): Promise<boolean> {
-  const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY') ?? '';
-  const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY') ?? '';
-
-  console.log('🔍 Checking Mailjet credentials...');
-  console.log('API Key exists:', !!MAILJET_API_KEY);
-  console.log('Secret Key exists:', !!MAILJET_SECRET_KEY);
-  console.log('API Key length:', MAILJET_API_KEY.length);
-  console.log('Secret Key length:', MAILJET_SECRET_KEY.length);
-
-  if (!MAILJET_API_KEY || !MAILJET_SECRET_KEY) {
-    console.error('❌ Mailjet API credentials not found in environment variables');
-    console.error('Available env vars:', Object.keys(Deno.env.toObject()));
-    return false;
-  }
-
-  const mailjetUrl = 'https://api.mailjet.com/v3.1/send';
-
-  const emailPayload = {
-    Messages: [
-      {
-        From: {
-          Email: "noreply@eduvantage.com",
-          Name: "EduVantage"
-        },
-        To: [
-          {
-            Email: emailData.to,
-            Name: emailData.to.split('@')[0] || "Student"
-          }
-        ],
-        Subject: emailData.subject,
-        HTMLPart: emailData.html
-      }
-    ]
-  };
+  const EMAIL_MICROSERVICE_URL = 'https://deploy-send-email.onrender.com/send';
 
   try {
-    console.log(`📧 Sending email to ${emailData.to} via Mailjet...`);
+    console.log(`📧 Sending email to ${emailData.to} via microservice...`);
     console.log('📧 Email subject:', emailData.subject);
-    console.log('📧 Mailjet URL:', mailjetUrl);
+    console.log('📧 Microservice URL:', EMAIL_MICROSERVICE_URL);
     
-    const authHeader = "Basic " + btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`);
-    console.log('📧 Auth header created (length):', authHeader.length);
-    
-    const response = await fetch(mailjetUrl, {
+    const response = await fetch(EMAIL_MICROSERVICE_URL, {
       method: "POST",
       headers: {
-        "Authorization": authHeader,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(emailPayload)
+      body: JSON.stringify({
+        to: emailData.to,
+        subject: emailData.subject,
+        html: emailData.html
+      })
     });
 
-    console.log('📧 Mailjet response status:', response.status);
-    console.log('📧 Mailjet response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('📧 Microservice response status:', response.status);
     
     const responseData = await response.json();
-    console.log('📧 Mailjet response data:', JSON.stringify(responseData, null, 2));
+    console.log('📧 Microservice response data:', JSON.stringify(responseData, null, 2));
     
-    if (response.ok) {
+    if (response.ok && responseData.success) {
       console.log(`✅ Email sent successfully to ${emailData.to}`);
       return true;
     } else {
-      console.error(`❌ Mailjet API error (${response.status}):`, responseData);
+      console.error(`❌ Email microservice error (${response.status}):`, responseData);
       return false;
     }
   } catch (error) {
-    console.error('❌ Failed to send email via Mailjet:', error);
+    console.error('❌ Failed to send email via microservice:', error);
     console.error('❌ Error details:', error.message);
     console.error('❌ Error stack:', error.stack);
     return false;
@@ -216,7 +181,7 @@ serve(async (req) => {
           htmlLength: emailData.html.length
         });
 
-        // Send email via Mailjet
+        // Send email via microservice
         const emailSent = await sendEmail({
           to: user.email,
           subject: emailData.subject,
@@ -275,7 +240,8 @@ serve(async (req) => {
         today,
         processedReminders: reminders.length,
         successfulEmails: emailsSent,
-        failedEmails: errors.length
+        failedEmails: errors.length,
+        microserviceUrl: 'https://deploy-send-email.onrender.com/send'
       }
     };
 
@@ -451,6 +417,9 @@ function generateReminderEmail(
       <div style="text-align: center; padding-top: 24px; border-top: 1px solid #e5e7eb;">
         <p style="color: #6b7280; margin: 0; font-size: 12px;">
           This is an automated reminder from EduVantage. You can manage your deadline notifications in your account settings.
+        </p>
+        <p style="color: #6b7280; margin: 8px 0 0 0; font-size: 10px;">
+          Powered by EduVantage Email System
         </p>
       </div>
     </div>

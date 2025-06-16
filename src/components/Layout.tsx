@@ -29,7 +29,7 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
   ]
 
   return (
-    <div className="min-h-screen bg-[#f4f9fd] dark:bg-gray-900 transition-colors duration-200">
+    <div className="min-h-screen bg-[#6ff2e1] dark:bg-gray-900 transition-colors duration-200">
       {/* Header */}
       <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

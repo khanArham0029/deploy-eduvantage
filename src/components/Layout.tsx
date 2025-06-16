@@ -1,5 +1,5 @@
 import React from 'react'
-import { GraduationCap, LogOut, MessageCircle, Target, User, Moon, Sun, Search, Settings, Calendar, Home } from 'lucide-react'
+import { GraduationCap, LogOut, MessageCircle, User, Moon, Sun, Search, Settings, Calendar, Home } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useUserProfile } from '../hooks/useUserProfile'
 import { useTheme } from '../contexts/ThemeContext'
@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 
 interface LayoutProps {
   children: React.ReactNode
-  currentPage?: 'home' | 'dashboard' | 'recommender' | 'chat' | 'profile' | 'browse' | 'deadlines'
+  currentPage?: 'home' | 'dashboard' | 'chat' | 'profile' | 'browse' | 'deadlines'
   onNavigate?: (page: string) => void
 }
 
@@ -24,7 +24,6 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
     { id: 'home', label: 'Home', icon: Home },
     { id: 'dashboard', label: 'Dashboard', icon: User },
     { id: 'browse', label: 'Browse', icon: Search },
-    { id: 'recommender', label: 'Recommendations', icon: Target },
     { id: 'deadlines', label: 'Deadlines', icon: Calendar },
     { id: 'chat', label: 'AI Advisor', icon: MessageCircle },
   ]

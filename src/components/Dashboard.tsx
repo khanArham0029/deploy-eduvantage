@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Target, MessageCircle, User, Book, MapPin, GraduationCap, DollarSign, Search, Calendar, Clock, AlertTriangle } from 'lucide-react'
+import { MessageCircle, User, Search, Calendar, GraduationCap, DollarSign, MapPin, Book } from 'lucide-react'
 import { useUserProfile } from '../hooks/useUserProfile'
 
 interface DashboardProps {
@@ -19,9 +19,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       bgColor: 'bg-emerald-50 dark:bg-emerald-900/20'
     },
     {
-      label: 'Recommendations Ready',
-      value: 'Available',
-      icon: Target,
+      label: 'Universities Available',
+      value: '10K+',
+      icon: GraduationCap,
       color: 'text-teal-600',
       bgColor: 'bg-teal-50 dark:bg-teal-900/20'
     },
@@ -41,13 +41,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       icon: Search,
       color: 'bg-emerald-500 hover:bg-emerald-600',
       action: () => onNavigate('browse')
-    },
-    {
-      title: 'Get University Recommendations',
-      description: 'Discover personalized university matches based on your profile and preferences.',
-      icon: Target,
-      color: 'bg-teal-600 hover:bg-teal-700',
-      action: () => onNavigate('recommender')
     },
     {
       title: 'Track Application Deadlines',
@@ -75,7 +68,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       >
         <h1 className="text-3xl font-bold mb-2">Welcome back, {profile?.full_name || 'Student'}!</h1>
         <p className="text-emerald-100">
-          Ready to find your perfect university match? Let's continue your journey.
+          Ready to explore universities and manage your applications? Let's continue your journey.
         </p>
       </motion.div>
 
@@ -145,7 +138,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {actions.map((action, index) => (
           <motion.button
             key={action.title}

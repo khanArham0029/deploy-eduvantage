@@ -3,7 +3,6 @@ import React from "react";
 import { ContainerScroll } from "./ui/container-scroll-animation";
 import { motion } from "framer-motion";
 import { 
-  Target, 
   MessageCircle, 
   Search, 
   Calendar, 
@@ -57,7 +56,7 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
               </h1>
               
               <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto mb-8 leading-relaxed">
-                AI-powered recommendations, personalized guidance, and comprehensive tracking 
+                AI-powered guidance, comprehensive university database, and smart deadline tracking 
                 for your university application journey. Join thousands of students who found 
                 their dream university with EduVantage.
               </p>
@@ -65,11 +64,11 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                 <GradientButton
-                  onClick={() => onNavigate('recommender')}
+                  onClick={() => onNavigate('browse')}
                   className="group flex items-center space-x-2"
                 >
-                  <Target className="h-5 w-5" />
-                  <span>Get Recommendations</span>
+                  <Search className="h-5 w-5" />
+                  <span>Browse Universities</span>
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </GradientButton>
                 
@@ -147,14 +146,6 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                   <p className="text-emerald-100 text-sm">Explore 10,000+ programs worldwide</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-teal-500 to-teal-600 text-white p-6 rounded-xl">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <Target className="h-6 w-6" />
-                    <h3 className="font-semibold">AI Recommendations</h3>
-                  </div>
-                  <p className="text-teal-100 text-sm">Get personalized matches</p>
-                </div>
-
                 <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl">
                   <div className="flex items-center space-x-3 mb-3">
                     <MessageCircle className="h-6 w-6" />
@@ -169,6 +160,14 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                     <h3 className="font-semibold">Deadline Tracker</h3>
                   </div>
                   <p className="text-orange-100 text-sm">Never miss an application</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-teal-500 to-teal-600 text-white p-6 rounded-xl">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <GraduationCap className="h-6 w-6" />
+                    <h3 className="font-semibold">Smart Matching</h3>
+                  </div>
+                  <p className="text-teal-100 text-sm">AI-powered recommendations</p>
                 </div>
               </div>
 
@@ -214,9 +213,9 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                icon: Target,
-                title: "Smart Matching",
-                description: "AI analyzes 50+ factors including your academic profile, preferences, and career goals to find perfect university matches.",
+                icon: Search,
+                title: "University Browser",
+                description: "Browse 10,000+ universities and programs worldwide with detailed information, requirements, and deadlines.",
                 color: "from-emerald-500 to-emerald-600"
               },
               {
@@ -224,12 +223,6 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 title: "24/7 AI Advisor",
                 description: "Get instant answers about admissions, requirements, scholarships, and application strategies from our intelligent chatbot.",
                 color: "from-teal-500 to-teal-600"
-              },
-              {
-                icon: Search,
-                title: "Comprehensive Database",
-                description: "Browse 10,000+ universities and programs worldwide with detailed information, requirements, and deadlines.",
-                color: "from-green-500 to-green-600"
               },
               {
                 icon: Calendar,
@@ -248,6 +241,12 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 title: "Expert Guidance",
                 description: "Access personalized advice from education consultants and connect with current students and alumni.",
                 color: "from-cyan-500 to-cyan-600"
+              },
+              {
+                icon: Globe,
+                title: "Global Reach",
+                description: "Explore universities across multiple countries and find international opportunities that match your goals.",
+                color: "from-purple-500 to-purple-600"
               }
             ].map((feature, index) => (
               <motion.div
@@ -296,7 +295,7 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 name: "Sarah Chen",
                 university: "Stanford University",
                 program: "Computer Science MS",
-                quote: "EduVantage's AI recommendations helped me discover programs I never knew existed. The personalized guidance was invaluable!",
+                quote: "EduVantage's university browser helped me discover programs I never knew existed. The AI advisor was invaluable!",
                 rating: 5
               },
               {
@@ -310,7 +309,7 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 name: "Maria Rodriguez",
                 university: "Oxford University",
                 program: "International Relations MA",
-                quote: "From university selection to scholarship applications, EduVantage guided me through every step. Highly recommended!",
+                quote: "From university selection to application tracking, EduVantage guided me through every step. Highly recommended!",
                 rating: 5
               }
             ].map((story, index) => (
@@ -360,20 +359,20 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <GradientButton
-                onClick={() => onNavigate('recommender')}
+                onClick={() => onNavigate('browse')}
                 className="group flex items-center justify-center space-x-2 bg-white text-emerald-600 hover:bg-gray-100"
               >
-                <Target className="h-5 w-5" />
+                <Search className="h-5 w-5" />
                 <span>Get Started Free</span>
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </GradientButton>
               <GradientButton
                 variant="variant"
-                onClick={() => onNavigate('browse')}
+                onClick={() => onNavigate('chat')}
                 className="group flex items-center justify-center space-x-2 border-2 border-white text-white hover:bg-white hover:text-emerald-600"
               >
-                <Search className="h-5 w-5" />
-                <span>Browse Universities</span>
+                <MessageCircle className="h-5 w-5" />
+                <span>Chat with AI Advisor</span>
               </GradientButton>
             </div>
           </motion.div>

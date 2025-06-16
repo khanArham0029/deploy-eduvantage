@@ -6,7 +6,6 @@ import { ProfileSetup } from './components/ProfileSetup'
 import { ProfileEdit } from './components/ProfileEdit'
 import { Layout } from './components/Layout'
 import { Dashboard } from './components/Dashboard'
-import { UniversityRecommender } from './components/UniversityRecommender'
 import { ChatInterface } from './components/ChatInterface'
 import { UniversitiesBrowse } from './components/UniversitiesBrowse'
 import { DeadlineTracker } from './components/DeadlineTracker'
@@ -15,7 +14,7 @@ import { HeroScrollDemo } from './components/HeroScrollDemo'
 function App() {
   const { user, loading: authLoading } = useAuth()
   const { profile, loading: profileLoading } = useUserProfile()
-  const [currentPage, setCurrentPage] = useState<'home' | 'dashboard' | 'recommender' | 'chat' | 'profile' | 'browse' | 'deadlines'>('home')
+  const [currentPage, setCurrentPage] = useState<'home' | 'dashboard' | 'chat' | 'profile' | 'browse' | 'deadlines'>('home')
 
   // Show loading spinner while checking authentication
   if (authLoading || (user && profileLoading)) {
@@ -48,8 +47,6 @@ function App() {
     switch (currentPage) {
       case 'browse':
         return <UniversitiesBrowse />
-      case 'recommender':
-        return <UniversityRecommender onNavigate={setCurrentPage} />
       case 'chat':
         return <ChatInterface />
       case 'profile':

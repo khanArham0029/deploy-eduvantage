@@ -8,21 +8,22 @@ const corsHeaders = {
 }
 
 interface EmailData {
-  to: string
+  recipient_email: string
+  recipient_name: string
   subject: string
-  html: string
+  html_body: string
 }
 
 /**
- * Sends an email via the external email microservice
- * @param {Object} emailData - Contains `to`, `subject`, and `html`
+ * Sends an email via the FastAPI email microservice
+ * @param {Object} emailData - Contains recipient_email, recipient_name, subject, and html_body
  * @returns {boolean} true if successful, false otherwise
  */
 async function sendEmail(emailData: EmailData): Promise<boolean> {
-  const EMAIL_MICROSERVICE_URL = 'https://deploy-send-email.onrender.com/send';
+  const EMAIL_MICROSERVICE_URL = 'https://deploy-send-email.onrender.com/send-reminder';
 
   try {
-    console.log(`📧 Sending email to ${emailData.to} via microservice...`);
+    console.log(`📧 Sending email to ${emailData.recipient_email} via FastAPI microservice...`);
     console.log('📧 Email subject:', emailData.subject);
     console.log('📧 Microservice URL:', EMAIL_MICROSERVICE_URL);
     
@@ -32,26 +33,27 @@ async function sendEmail(emailData: EmailData): Promise<boolean> {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        to: emailData.to,
+        recipient_email: emailData.recipient_email,
+        recipient_name: emailData.recipient_name,
         subject: emailData.subject,
-        html: emailData.html
+        html_body: emailData.html_body
       })
     });
 
-    console.log('📧 Microservice response status:', response.status);
+    console.log('📧 FastAPI response status:', response.status);
     
     const responseData = await response.json();
-    console.log('📧 Microservice response data:', JSON.stringify(responseData, null, 2));
+    console.log('📧 FastAPI response data:', JSON.stringify(responseData, null, 2));
     
     if (response.ok && responseData.success) {
-      console.log(`✅ Email sent successfully to ${emailData.to}`);
+      console.log(`✅ Email sent successfully to ${emailData.recipient_email}`);
       return true;
     } else {
-      console.error(`❌ Email microservice error (${response.status}):`, responseData);
+      console.error(`❌ FastAPI microservice error (${response.status}):`, responseData);
       return false;
     }
   } catch (error) {
-    console.error('❌ Failed to send email via microservice:', error);
+    console.error('❌ Failed to send email via FastAPI microservice:', error);
     console.error('❌ Error details:', error.message);
     console.error('❌ Error stack:', error.stack);
     return false;
@@ -176,16 +178,18 @@ serve(async (req) => {
         )
 
         console.log('📧 Generated email data:', {
-          to: user.email,
+          recipient_email: user.email,
+          recipient_name: user.full_name || 'Student',
           subject: emailData.subject,
           htmlLength: emailData.html.length
         });
 
-        // Send email via microservice
+        // Send email via FastAPI microservice
         const emailSent = await sendEmail({
-          to: user.email,
+          recipient_email: user.email,
+          recipient_name: user.full_name || 'Student',
           subject: emailData.subject,
-          html: emailData.html
+          html_body: emailData.html
         })
 
         if (emailSent) {
@@ -241,7 +245,7 @@ serve(async (req) => {
         processedReminders: reminders.length,
         successfulEmails: emailsSent,
         failedEmails: errors.length,
-        microserviceUrl: 'https://deploy-send-email.onrender.com/send'
+        microserviceUrl: 'https://deploy-send-email.onrender.com/send-reminder'
       }
     };
 
@@ -419,7 +423,7 @@ function generateReminderEmail(
           This is an automated reminder from EduVantage. You can manage your deadline notifications in your account settings.
         </p>
         <p style="color: #6b7280; margin: 8px 0 0 0; font-size: 10px;">
-          Powered by EduVantage Email System
+          Powered by EduVantage FastAPI Email System
         </p>
       </div>
     </div>

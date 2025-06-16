@@ -1,10 +1,34 @@
-# Testing Application Deadline Reminder System
+# Testing Application Deadline Reminder System with FastAPI
 
 ## 🧪 Manual Testing Steps
 
-### 1. **Test the Edge Function Directly**
+### 1. **Test Your FastAPI Microservice Directly**
 
-You can manually trigger the reminder function to test it:
+First, verify your FastAPI service is working correctly:
+
+```bash
+# Test your FastAPI endpoint directly
+curl -X POST https://deploy-send-email.onrender.com/send-reminder \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient_email": "your-test-email@example.com",
+    "recipient_name": "Test User",
+    "subject": "⏰ Test Reminder - EduVantage",
+    "html_body": "<h1>Test Email</h1><p>This is a test email from EduVantage deadline reminder system.</p><p>If you receive this, the FastAPI microservice is working correctly!</p>"
+  }'
+```
+
+Expected response:
+```json
+{
+  "success": true,
+  "message": "Email sent successfully"
+}
+```
+
+### 2. **Test the Supabase Edge Function**
+
+You can manually trigger the reminder function to test the full integration:
 
 ```bash
 # Replace with your actual Supabase project URL and anon key
@@ -13,13 +37,14 @@ curl -X POST "https://oxdbhmdczslqnrllcwxm.supabase.co/functions/v1/send-deadlin
   -H "Content-Type: application/json"
 ```
 
-### 2. **Check Function Logs**
+### 3. **Check Function Logs**
 
 1. Go to your Supabase Dashboard
 2. Navigate to **Edge Functions** → **send-deadline-reminders**
 3. Click on the **Logs** tab to see detailed execution logs
+4. Look for messages about calling the FastAPI microservice
 
-### 3. **Verify Database Setup**
+### 4. **Verify Database Setup**
 
 Run these queries in your Supabase SQL Editor to check the data:
 
@@ -66,31 +91,24 @@ WHERE r.scheduled_date = CURRENT_DATE
 AND r.email_sent = false;
 ```
 
-### 4. **Test Email Microservice Directly**
+### 5. **Test the Complete Flow**
 
-You can test your email microservice directly:
-
-```bash
-curl -X POST https://deploy-send-email.onrender.com/send \
-  -H "Content-Type: application/json" \
-  -d '{
-    "to": "your-test-email@example.com",
-    "subject": "⏰ Test Reminder - EduVantage",
-    "html": "<h1>Test Email</h1><p>This is a test email from EduVantage deadline reminder system.</p><p>If you receive this, the email microservice is working correctly!</p>"
-  }'
-```
-
-Expected response:
-```json
-{
-  "success": true,
-  "message": "Email sent successfully!",
-  "details": {
-    "to": "your-test-email@example.com",
-    "status": "accepted"
-  }
-}
-```
+1. **Add a new application deadline** in your app
+2. **Check if immediate reminder is created**:
+   ```sql
+   SELECT * FROM deadline_reminders 
+   WHERE reminder_type = 'immediate' 
+   AND email_sent = false
+   ORDER BY created_at DESC LIMIT 5;
+   ```
+3. **Manually trigger the reminder function** (step 2 above)
+4. **Check if email was sent** and database updated:
+   ```sql
+   SELECT * FROM deadline_reminders 
+   WHERE reminder_type = 'immediate' 
+   AND email_sent = true
+   ORDER BY sent_at DESC LIMIT 5;
+   ```
 
 ## 🔧 **Setting Up Automated Reminders**
 
@@ -144,21 +162,22 @@ When you add a new application deadline:
 - Action items checklist
 - Personalized content
 - Reminder type explanation
-- **Now powered by your email microservice!**
+- **Now powered by your FastAPI microservice!**
 
 ## 🚨 **Troubleshooting**
 
 ### Common Issues:
 
-1. **No emails sent**: 
-   - Check if your email microservice is running: `https://deploy-send-email.onrender.com/send`
-   - Verify Mailjet credentials in your microservice environment
+1. **FastAPI microservice not responding**: 
+   - Check if your Render deployment is active: `https://deploy-send-email.onrender.com/send-reminder`
+   - Verify Mailjet credentials in your Render environment variables
+   - Check Render logs for any errors
    
 2. **Function errors**: Check Supabase function logs for detailed error messages
 
 3. **No reminders created**: Verify database triggers are working
 
-4. **Microservice errors**: Check your Render deployment logs
+4. **Wrong endpoint**: Make sure you're using `/send-reminder` not `/send`
 
 ### Debug Commands:
 
@@ -173,26 +192,39 @@ FROM information_schema.routines
 WHERE routine_name LIKE '%deadline%';
 ```
 
-### Test Microservice Health:
+### Test FastAPI Health:
 
 ```bash
-# Check if microservice is responding
-curl -X GET https://deploy-send-email.onrender.com/health
+# Check if your FastAPI service is responding
+curl -X GET https://deploy-send-email.onrender.com/
 
-# Or test with a simple ping
-curl -X POST https://deploy-send-email.onrender.com/send \
+# Test with your actual endpoint structure
+curl -X POST https://deploy-send-email.onrender.com/send-reminder \
   -H "Content-Type: application/json" \
-  -d '{"to":"test@example.com","subject":"Test","html":"<p>Test</p>"}'
+  -d '{
+    "recipient_email": "test@example.com",
+    "recipient_name": "Test User", 
+    "subject": "Test Subject",
+    "html_body": "<p>Test HTML content</p>"
+  }'
 ```
 
 ## 🔄 **Integration Benefits**
 
-By using your email microservice:
+By using your FastAPI microservice:
 
-1. **Reliability**: Dedicated service for email handling
+1. **Reliability**: Dedicated FastAPI service for email handling
 2. **Scalability**: Independent scaling of email functionality  
-3. **Maintainability**: Centralized email logic
+3. **Maintainability**: Centralized email logic in FastAPI
 4. **Monitoring**: Better error tracking and logging
 5. **Flexibility**: Easy to update email templates and logic
+6. **Type Safety**: Pydantic models ensure proper request validation
 
-The system now uses your microservice at `https://deploy-send-email.onrender.com/send` for all email delivery, making it more robust and easier to manage!
+## 📝 **Key Changes Made**
+
+1. **Updated endpoint**: Now calls `/send-reminder` instead of `/send`
+2. **Correct request format**: Uses `recipient_email`, `recipient_name`, `subject`, `html_body`
+3. **Proper error handling**: Checks for `success` field in FastAPI response
+4. **Enhanced logging**: Better debugging information for FastAPI integration
+
+The system now properly integrates with your FastAPI microservice at `https://deploy-send-email.onrender.com/send-reminder` using the exact request format your service expects!

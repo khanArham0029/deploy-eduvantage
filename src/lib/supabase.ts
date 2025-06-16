@@ -158,21 +158,44 @@ export type Database = {
           created_at: string
         }
       }
-      structured_universities: {
+      universities: {
         Row: {
           id: string
           name: string
           country: string
-          location: string
-          field_of_study: string
-          degree_level: string
-          tuition_fee: number
-          gpa_requirement: number
-          ielts_requirement: number
-          toefl_requirement: number | null
-          application_deadline: string
-          program_duration: string
+          city: string
+          area_description: string | null
+          website_url: string | null
+          contact_email: string | null
+          global_ranking: number | null
+          research_ranking: number | null
+          student_population: number | null
+          acceptance_rate: number | null
+          average_tuition_fee: number | null
+          extracurriculars: string | null
           created_at: string
+          updated_at: string
+        }
+      }
+      courses: {
+        Row: {
+          id: string
+          university_id: string
+          course_name: string
+          department: string
+          degree_type: string
+          course_duration: string | null
+          credit_hours: number | null
+          tuition_fee: number | null
+          application_deadline: string | null
+          requires_ielts: boolean
+          ielts_min_score: number | null
+          requires_toefl: boolean
+          toefl_min_score: number | null
+          prerequisites: string | null
+          program_url: string | null
+          created_at: string
+          updated_at: string
         }
       }
     }

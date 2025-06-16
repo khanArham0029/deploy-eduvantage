@@ -8,15 +8,15 @@ interface University {
   id: string
   name: string
   country: string
-  location: string
-  field_of_study: string
-  degree_level: string
+  city: string
+  course_name: string
+  department: string
+  degree_type: string
   tuition_fee: number
-  gpa_requirement: number
-  ielts_requirement: number
-  toefl_requirement: number | null
+  ielts_min_score: number
+  toefl_min_score: number | null
   application_deadline: string
-  program_duration: string
+  course_duration: string
   score?: number
 }
 
@@ -44,38 +44,61 @@ export function UniversityRecommender({ onNavigate }: RecommenderProps) {
     setShowQuestions(false)
 
     try {
-      // Query universities from Supabase
-      const { data: universities, error } = await supabase
-        .from('structured_universities')
-        .select('*')
-        .eq('country', profile.country_of_interest)
-        .eq('degree_level', profile.degree_level)
-        .lte('tuition_fee', profile.budget)
-        .lte('gpa_requirement', profile.gpa)
-        .lte('ielts_requirement', profile.ielts_score)
-        .ilike('field_of_study', `%${profile.field_of_study}%`)
+      // Query universities and courses from Supabase using the existing schema
+      const { data: coursesData, error } = await supabase
+        .from('courses')
+        .select(`
+          *,
+          universities (
+            name,
+            country,
+            city
+          )
+        `)
+        .eq('degree_type', profile.degree_level)
+        .lte('tuition_fee', profile.budget || 100000)
+        .lte('ielts_min_score', profile.ielts_score || 9)
+        .ilike('department', `%${profile.field_of_study}%`)
+        .limit(20)
 
       if (error) throw error
 
-      // Calculate matching scores
-      const scoredUniversities = (universities || []).map(uni => {
-        const gpaMatch = Math.min(profile.gpa / uni.gpa_requirement, 1) * 30
-        const budgetMatch = Math.min(profile.budget / uni.tuition_fee, 1) * 20
-        const languageMatch = Math.min(profile.ielts_score / uni.ielts_requirement, 1) * 20
-        const fieldMatch = 30 // Assumed perfect match since we filtered by field
+      // Transform the data to match our interface
+      const transformedUniversities = (coursesData || []).map(course => {
+        const university = course.universities as any
+        
+        // Calculate matching score
+        const budgetMatch = course.tuition_fee ? Math.min((profile.budget || 0) / course.tuition_fee, 1) * 30 : 0
+        const languageMatch = course.ielts_min_score ? Math.min((profile.ielts_score || 0) / course.ielts_min_score, 1) * 30 : 0
+        const fieldMatch = 40 // Assumed good match since we filtered by field
 
-        const totalScore = gpaMatch + budgetMatch + languageMatch + fieldMatch
-        return { ...uni, score: Math.round(totalScore) }
+        const totalScore = budgetMatch + languageMatch + fieldMatch
+        
+        return {
+          id: course.id,
+          name: university?.name || 'Unknown University',
+          country: university?.country || 'Unknown',
+          city: university?.city || 'Unknown',
+          course_name: course.course_name,
+          department: course.department,
+          degree_type: course.degree_type,
+          tuition_fee: course.tuition_fee || 0,
+          ielts_min_score: course.ielts_min_score || 0,
+          toefl_min_score: course.toefl_min_score,
+          application_deadline: course.application_deadline ? new Date(course.application_deadline).toLocaleDateString() : 'Not specified',
+          course_duration: course.course_duration || 'Not specified',
+          score: Math.round(totalScore)
+        }
       })
 
       // Sort by score and take top 5
-      const topRecommendations = scoredUniversities
+      const topRecommendations = transformedUniversities
         .sort((a, b) => (b.score || 0) - (a.score || 0))
         .slice(0, 5)
 
       setRecommendations(topRecommendations)
 
-      // Generate AI analysis (mock for now)
+      // Generate AI analysis
       const analysis = generateMockAIAnalysis(topRecommendations, profile, additionalQuestions)
       setAiAnalysis(analysis)
 
@@ -274,13 +297,16 @@ Would you like to discuss any specific university or need help with application 
                         <div className="flex items-center text-gray-600 dark:text-gray-400 space-x-4">
                           <span className="flex items-center">
                             <MapPin className="h-4 w-4 mr-1" />
-                            {university.location}, {university.country}
+                            {university.city}, {university.country}
                           </span>
                           <span className="flex items-center">
                             <Book className="h-4 w-4 mr-1" />
-                            {university.field_of_study}
+                            {university.course_name}
                           </span>
                         </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          {university.department} • {university.degree_type}
+                        </p>
                       </div>
                       <div className="text-right">
                         <div className="bg-blue-100 dark:bg-blue-900/20 text-[#115bfb] px-3 py-1 rounded-full text-sm font-medium">
@@ -294,16 +320,16 @@ Would you like to discuss any specific university or need help with application 
                         <p className="text-gray-500 dark:text-gray-400">Tuition Fee</p>
                         <p className="font-medium flex items-center text-gray-900 dark:text-white">
                           <DollarSign className="h-4 w-4 mr-1" />
-                          {university.tuition_fee.toLocaleString()}/year
+                          ${university.tuition_fee?.toLocaleString() || 'N/A'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500 dark:text-gray-400">GPA Required</p>
-                        <p className="font-medium text-gray-900 dark:text-white">{university.gpa_requirement}/4.0</p>
+                        <p className="text-gray-500 dark:text-gray-400">Duration</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{university.course_duration}</p>
                       </div>
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">IELTS Required</p>
-                        <p className="font-medium text-gray-900 dark:text-white">{university.ielts_requirement}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{university.ielts_min_score || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Application Deadline</p>

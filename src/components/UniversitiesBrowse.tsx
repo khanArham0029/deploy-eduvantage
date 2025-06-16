@@ -5,23 +5,47 @@ import { supabase } from '../lib/supabase'
 
 interface University {
   id: string
-  program_name: string
-  url: string
-  title: string
-  degree_level: string
-  duration: string
-  credits: string
-  admission_requirements: string
-  description: string
-  deadlines: string
-  prerequisites: string
+  name: string
+  country: string
+  city: string
+  area_description: string | null
+  website_url: string | null
+  contact_email: string | null
+  global_ranking: number | null
+  research_ranking: number | null
+  student_population: number | null
+  acceptance_rate: number | null
+  average_tuition_fee: number | null
+  extracurriculars: string | null
   created_at: string
+  updated_at: string
+  courses?: Course[]
+}
+
+interface Course {
+  id: string
+  university_id: string
+  course_name: string
+  department: string
+  degree_type: string
+  course_duration: string | null
+  credit_hours: number | null
+  tuition_fee: number | null
+  application_deadline: string | null
+  requires_ielts: boolean
+  ielts_min_score: number | null
+  requires_toefl: boolean
+  toefl_min_score: number | null
+  prerequisites: string | null
+  program_url: string | null
+  created_at: string
+  updated_at: string
 }
 
 interface Filters {
   search: string
-  degree_level: string
-  duration: string
+  degree_type: string
+  country: string
   sort_by: string
 }
 
@@ -32,9 +56,9 @@ export function UniversitiesBrowse() {
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState<Filters>({
     search: '',
-    degree_level: '',
-    duration: '',
-    sort_by: 'newest'
+    degree_type: '',
+    country: '',
+    sort_by: 'name'
   })
 
   useEffect(() => {
@@ -47,15 +71,22 @@ export function UniversitiesBrowse() {
 
   const fetchUniversities = async () => {
     try {
-      const { data, error } = await supabase
-        .from('structured_data')
-        .select('*')
-        .order('created_at', { ascending: false })
+      // Fetch universities with their courses
+      const { data: universitiesData, error: universitiesError } = await supabase
+        .from('universities')
+        .select(`
+          *,
+          courses (*)
+        `)
+        .order('name', { ascending: true })
 
-      if (error) throw error
-      setUniversities(data || [])
+      if (universitiesError) throw universitiesError
+      
+      setUniversities(universitiesData || [])
     } catch (error) {
       console.error('Error fetching universities:', error)
+      // Set empty array to prevent infinite loading
+      setUniversities([])
     } finally {
       setLoading(false)
     }
@@ -68,36 +99,46 @@ export function UniversitiesBrowse() {
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase()
       filtered = filtered.filter(uni => 
-        uni.program_name?.toLowerCase().includes(searchTerm) ||
-        uni.title?.toLowerCase().includes(searchTerm) ||
-        uni.description?.toLowerCase().includes(searchTerm)
+        uni.name?.toLowerCase().includes(searchTerm) ||
+        uni.city?.toLowerCase().includes(searchTerm) ||
+        uni.country?.toLowerCase().includes(searchTerm) ||
+        uni.area_description?.toLowerCase().includes(searchTerm) ||
+        uni.courses?.some(course => 
+          course.course_name?.toLowerCase().includes(searchTerm) ||
+          course.department?.toLowerCase().includes(searchTerm)
+        )
       )
     }
 
-    // Degree level filter
-    if (filters.degree_level) {
+    // Country filter
+    if (filters.country) {
       filtered = filtered.filter(uni => 
-        uni.degree_level?.toLowerCase().includes(filters.degree_level.toLowerCase())
+        uni.country?.toLowerCase().includes(filters.country.toLowerCase())
       )
     }
 
-    // Duration filter
-    if (filters.duration) {
+    // Degree type filter (check courses)
+    if (filters.degree_type) {
       filtered = filtered.filter(uni => 
-        uni.duration?.toLowerCase().includes(filters.duration.toLowerCase())
+        uni.courses?.some(course => 
+          course.degree_type?.toLowerCase().includes(filters.degree_type.toLowerCase())
+        )
       )
     }
 
     // Sort
     switch (filters.sort_by) {
       case 'name':
-        filtered.sort((a, b) => (a.program_name || '').localeCompare(b.program_name || ''))
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
         break
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      case 'ranking':
+        filtered.sort((a, b) => (a.global_ranking || 999999) - (b.global_ranking || 999999))
         break
-      case 'oldest':
-        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      case 'tuition':
+        filtered.sort((a, b) => (a.average_tuition_fee || 0) - (b.average_tuition_fee || 0))
+        break
+      case 'acceptance_rate':
+        filtered.sort((a, b) => (b.acceptance_rate || 0) - (a.acceptance_rate || 0))
         break
     }
 
@@ -107,13 +148,13 @@ export function UniversitiesBrowse() {
   const clearFilters = () => {
     setFilters({
       search: '',
-      degree_level: '',
-      duration: '',
-      sort_by: 'newest'
+      degree_type: '',
+      country: '',
+      sort_by: 'name'
     })
   }
 
-  const hasActiveFilters = filters.search || filters.degree_level || filters.duration || filters.sort_by !== 'newest'
+  const hasActiveFilters = filters.search || filters.degree_type || filters.country || filters.sort_by !== 'name'
 
   if (loading) {
     return (
@@ -136,7 +177,7 @@ export function UniversitiesBrowse() {
       >
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Browse Universities</h1>
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Explore our comprehensive database of university programs and find the perfect match for your academic journey.
+          Explore our comprehensive database of universities and their programs to find the perfect match for your academic journey.
         </p>
       </motion.div>
 
@@ -153,7 +194,7 @@ export function UniversitiesBrowse() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
-              placeholder="Search universities, programs, or keywords..."
+              placeholder="Search universities, programs, or locations..."
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#115bfb] focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -173,7 +214,7 @@ export function UniversitiesBrowse() {
           {/* Results Count */}
           <div className="flex items-center px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {filteredUniversities.length} programs found
+              {filteredUniversities.length} universities found
             </span>
           </div>
         </div>
@@ -190,36 +231,32 @@ export function UniversitiesBrowse() {
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Degree Level
+                    Degree Type
                   </label>
                   <select
-                    value={filters.degree_level}
-                    onChange={(e) => setFilters(prev => ({ ...prev, degree_level: e.target.value }))}
+                    value={filters.degree_type}
+                    onChange={(e) => setFilters(prev => ({ ...prev, degree_type: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#115bfb] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    <option value="">All Levels</option>
-                    <option value="bachelor">Bachelor's</option>
-                    <option value="master">Master's</option>
-                    <option value="phd">PhD</option>
-                    <option value="diploma">Diploma</option>
+                    <option value="">All Degrees</option>
+                    <option value="Bachelors">Bachelor's</option>
+                    <option value="Masters">Master's</option>
+                    <option value="PhD">PhD</option>
+                    <option value="Diploma">Diploma</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Duration
+                    Country
                   </label>
-                  <select
-                    value={filters.duration}
-                    onChange={(e) => setFilters(prev => ({ ...prev, duration: e.target.value }))}
+                  <input
+                    type="text"
+                    placeholder="Enter country"
+                    value={filters.country}
+                    onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#115bfb] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    <option value="">Any Duration</option>
-                    <option value="1 year">1 Year</option>
-                    <option value="2 year">2 Years</option>
-                    <option value="3 year">3 Years</option>
-                    <option value="4 year">4 Years</option>
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -231,9 +268,10 @@ export function UniversitiesBrowse() {
                     onChange={(e) => setFilters(prev => ({ ...prev, sort_by: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#115bfb] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
                     <option value="name">Name A-Z</option>
+                    <option value="ranking">Global Ranking</option>
+                    <option value="tuition">Tuition Fee</option>
+                    <option value="acceptance_rate">Acceptance Rate</option>
                   </select>
                 </div>
 
@@ -272,25 +310,23 @@ export function UniversitiesBrowse() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#115bfb] transition-colors">
-                        {university.program_name || university.title || 'University Program'}
+                        {university.name}
                       </h3>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        {university.degree_level && (
+                        <span className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {university.city}, {university.country}
+                        </span>
+                        {university.global_ranking && (
                           <span className="flex items-center">
-                            <GraduationCap className="h-4 w-4 mr-1" />
-                            {university.degree_level}
+                            <Award className="h-4 w-4 mr-1" />
+                            Rank #{university.global_ranking}
                           </span>
                         )}
-                        {university.duration && (
+                        {university.student_population && (
                           <span className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            {university.duration}
-                          </span>
-                        )}
-                        {university.credits && (
-                          <span className="flex items-center">
-                            <Book className="h-4 w-4 mr-1" />
-                            {university.credits} credits
+                            <Users className="h-4 w-4 mr-1" />
+                            {university.student_population.toLocaleString()} students
                           </span>
                         )}
                       </div>
@@ -298,38 +334,59 @@ export function UniversitiesBrowse() {
                   </div>
 
                   {/* Description */}
-                  {university.description && (
+                  {university.area_description && (
                     <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-                      {university.description}
+                      {university.area_description}
                     </p>
                   )}
 
-                  {/* Requirements & Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {university.admission_requirements && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Admission Requirements</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {university.admission_requirements}
-                        </p>
+                  {/* University Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    {university.acceptance_rate && (
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Acceptance Rate</div>
+                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {university.acceptance_rate}%
+                        </div>
                       </div>
                     )}
-                    {university.prerequisites && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Prerequisites</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {university.prerequisites}
-                        </p>
+                    {university.average_tuition_fee && (
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Tuition</div>
+                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                          ${university.average_tuition_fee.toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                    {university.courses && university.courses.length > 0 && (
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Programs</div>
+                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {university.courses.length} courses
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Deadlines */}
-                  {university.deadlines && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Calendar className="h-4 w-4 text-orange-500" />
-                      <span className="text-gray-600 dark:text-gray-400">Deadline:</span>
-                      <span className="font-medium text-orange-600 dark:text-orange-400">{university.deadlines}</span>
+                  {/* Sample Courses */}
+                  {university.courses && university.courses.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Popular Programs</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {university.courses.slice(0, 3).map((course) => (
+                          <span
+                            key={course.id}
+                            className="px-3 py-1 bg-[#115bfb]/10 text-[#115bfb] dark:bg-[#115bfb]/20 dark:text-[#4a9eff] rounded-full text-sm"
+                          >
+                            {course.course_name}
+                          </span>
+                        ))}
+                        {university.courses.length > 3 && (
+                          <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-sm">
+                            +{university.courses.length - 3} more
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -337,15 +394,15 @@ export function UniversitiesBrowse() {
                 {/* Action Button */}
                 <div className="lg:w-48 flex flex-col justify-between">
                   <div className="space-y-3">
-                    {university.url && (
+                    {university.website_url && (
                       <a
-                        href={university.url}
+                        href={university.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-[#115bfb] text-white rounded-lg hover:bg-[#0d4ad9] transition-colors group"
                       >
                         <ExternalLink className="h-4 w-4" />
-                        <span>View Details</span>
+                        <span>Visit Website</span>
                       </a>
                     )}
                     
@@ -356,7 +413,7 @@ export function UniversitiesBrowse() {
                   </div>
                   
                   <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                    Added {new Date(university.created_at).toLocaleDateString()}
+                    Updated {new Date(university.updated_at).toLocaleDateString()}
                   </div>
                 </div>
               </div>
@@ -398,7 +455,7 @@ export function UniversitiesBrowse() {
           className="text-center"
         >
           <p className="text-gray-600 dark:text-gray-400">
-            Showing {filteredUniversities.length} of {universities.length} programs
+            Showing {filteredUniversities.length} universities
           </p>
         </motion.div>
       )}

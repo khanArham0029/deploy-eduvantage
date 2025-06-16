@@ -85,19 +85,10 @@ serve(async (req) => {
     const today = new Date().toISOString().split('T')[0]
     console.log('📅 Today\'s date:', today);
     
-    // Find reminders that should be sent today
-    console.log('🔍 Querying reminders for today...');
+    // Use the new function to get reminders with user info
+    console.log('🔍 Calling get_reminders_with_user_info function...');
     const { data: reminders, error: remindersError } = await supabaseAdmin
-      .from('deadline_reminders')
-      .select(`
-        *,
-        application_deadlines (
-          *,
-          users (email, full_name)
-        )
-      `)
-      .eq('scheduled_date', today)
-      .eq('email_sent', false)
+      .rpc('get_reminders_with_user_info')
 
     if (remindersError) {
       console.error('❌ Error fetching reminders:', remindersError)
@@ -145,49 +136,53 @@ serve(async (req) => {
     // Process each reminder
     for (const reminder of reminders) {
       try {
-        console.log(`🔄 Processing reminder ${reminder.id}...`);
+        console.log(`🔄 Processing reminder ${reminder.reminder_id}...`);
         
-        const application = reminder.application_deadlines
-        const user = application.users
+        console.log('👤 User data:', {
+          email: reminder.user_email,
+          name: reminder.user_full_name
+        });
+        console.log('📝 Application data:', {
+          university: reminder.university_name,
+          program: reminder.program_name,
+          deadline: reminder.application_deadline
+        });
 
-        console.log('👤 User data:', JSON.stringify(user, null, 2));
-        console.log('📝 Application data:', JSON.stringify(application, null, 2));
-
-        if (!user?.email) {
-          console.error(`❌ No email found for user in application ${application.id}`)
-          errors.push(`No email for application ${application.id}`)
+        if (!reminder.user_email) {
+          console.error(`❌ No email found for reminder ${reminder.reminder_id}`)
+          errors.push(`No email for reminder ${reminder.reminder_id}`)
           continue
         }
 
         // Calculate days until deadline
-        const deadlineDate = new Date(application.application_deadline)
+        const deadlineDate = new Date(reminder.application_deadline)
         const todayDate = new Date()
         const daysUntil = Math.ceil((deadlineDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24))
 
-        console.log(`📅 Processing reminder for ${user.email}: ${daysUntil} days until deadline`)
+        console.log(`📅 Processing reminder for ${reminder.user_email}: ${daysUntil} days until deadline`)
 
         // Generate email content based on reminder type
         const emailData = generateReminderEmail(
-          user.full_name || 'Student',
-          application.university_name,
-          application.program_name,
-          application.application_deadline,
+          reminder.user_full_name || 'Student',
+          reminder.university_name,
+          reminder.program_name,
+          reminder.application_deadline.toString(),
           daysUntil,
           reminder.reminder_type,
-          application.reminder_type
+          'before_deadline' // Default reminder type for email template
         )
 
         console.log('📧 Generated email data:', {
-          recipient_email: user.email,
-          recipient_name: user.full_name || 'Student',
+          recipient_email: reminder.user_email,
+          recipient_name: reminder.user_full_name || 'Student',
           subject: emailData.subject,
           htmlLength: emailData.html.length
         });
 
         // Send email via FastAPI microservice
         const emailSent = await sendEmail({
-          recipient_email: user.email,
-          recipient_name: user.full_name || 'Student',
+          recipient_email: reminder.user_email,
+          recipient_name: reminder.user_full_name || 'Student',
           subject: emailData.subject,
           html_body: emailData.html
         })
@@ -202,11 +197,11 @@ serve(async (req) => {
               email_sent: true, 
               sent_at: new Date().toISOString() 
             })
-            .eq('id', reminder.id)
+            .eq('id', reminder.reminder_id)
 
           if (updateError) {
             console.error('❌ Error updating reminder:', updateError);
-            errors.push(`Failed to update reminder ${reminder.id}: ${updateError.message}`);
+            errors.push(`Failed to update reminder ${reminder.reminder_id}: ${updateError.message}`);
           }
 
           // Mark first reminder as sent if this is an immediate reminder
@@ -214,23 +209,23 @@ serve(async (req) => {
             const { error: appUpdateError } = await supabaseAdmin
               .from('application_deadlines')
               .update({ first_reminder_sent: true })
-              .eq('id', application.id)
+              .eq('id', reminder.application_id)
 
             if (appUpdateError) {
               console.error('❌ Error updating application:', appUpdateError);
-              errors.push(`Failed to update application ${application.id}: ${appUpdateError.message}`);
+              errors.push(`Failed to update application ${reminder.application_id}: ${appUpdateError.message}`);
             }
           }
 
           emailsSent++
-          console.log(`✅ Reminder sent to ${user.email} for ${application.university_name}`)
+          console.log(`✅ Reminder sent to ${reminder.user_email} for ${reminder.university_name}`)
         } else {
-          errors.push(`Failed to send email to ${user.email}`)
+          errors.push(`Failed to send email to ${reminder.user_email}`)
         }
 
       } catch (error) {
-        console.error(`❌ Error processing reminder ${reminder.id}:`, error)
-        errors.push(`Reminder ${reminder.id}: ${error.message}`)
+        console.error(`❌ Error processing reminder ${reminder.reminder_id}:`, error)
+        errors.push(`Reminder ${reminder.reminder_id}: ${error.message}`)
       }
     }
 

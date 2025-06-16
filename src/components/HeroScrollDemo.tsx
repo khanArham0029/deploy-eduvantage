@@ -23,7 +23,7 @@ interface HeroScrollDemoProps {
 
 export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
   return (
-    <div className="flex flex-col overflow-hidden">
+    <div className="flex flex-col overflow-hidden bg-gray-900">
       <ContainerScroll
         titleComponent={
           <div className="space-y-8">
@@ -45,7 +45,7 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 </motion.div>
               </div>
               
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
                 Discover Your
                 <br />
                 <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 bg-clip-text text-transparent">
@@ -55,7 +55,7 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 Match with AI
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto mb-8 leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto mb-8 leading-relaxed">
                 AI-powered guidance, comprehensive university database, and smart deadline tracking 
                 for your university application journey. Join thousands of students who found 
                 their dream university with EduVantage.
@@ -90,16 +90,16 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 className="grid grid-cols-3 gap-8 max-w-2xl mx-auto"
               >
                 <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-emerald-600 mb-2">10K+</div>
-                  <div className="text-gray-600 dark:text-gray-400 text-sm">Universities</div>
+                  <div className="text-3xl md:text-4xl font-bold text-emerald-400 mb-2">10K+</div>
+                  <div className="text-gray-400 text-sm">Universities</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-teal-500 mb-2">50K+</div>
-                  <div className="text-gray-600 dark:text-gray-400 text-sm">Students Helped</div>
+                  <div className="text-3xl md:text-4xl font-bold text-teal-400 mb-2">50K+</div>
+                  <div className="text-gray-400 text-sm">Students Helped</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">95%</div>
-                  <div className="text-gray-600 dark:text-gray-400 text-sm">Success Rate</div>
+                  <div className="text-3xl md:text-4xl font-bold text-green-400 mb-2">95%</div>
+                  <div className="text-gray-400 text-sm">Success Rate</div>
                 </div>
               </motion.div>
             </motion.div>
@@ -107,23 +107,23 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
         }
       >
         {/* Dashboard Preview */}
-        <div className="h-full w-full bg-gradient-to-br from-gray-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-900/20 p-4 md:p-8">
-          <div className="h-full w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="h-full w-full bg-gradient-to-br from-gray-800 to-gray-900 p-4 md:p-8">
+          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
             {/* Mock Header */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+            <div className="bg-gray-800 border-b border-gray-700 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
                     <GraduationCap className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <div className="font-bold text-gray-900 dark:text-white">EduVantage</div>
-                    <div className="text-xs text-gray-500">AI University Advisory</div>
+                    <div className="font-bold text-white">EduVantage</div>
+                    <div className="text-xs text-gray-400">AI University Advisory</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <span className="text-sm text-gray-500">Online</span>
+                  <span className="text-sm text-gray-400">Online</span>
                 </div>
               </div>
             </div>
@@ -173,17 +173,17 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
 
               {/* Mock Stats */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-emerald-600 mb-1">100%</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Profile Complete</div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-emerald-400 mb-1">100%</div>
+                  <div className="text-xs text-gray-400">Profile Complete</div>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-teal-600 mb-1">5</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Applications</div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-teal-400 mb-1">5</div>
+                  <div className="text-xs text-gray-400">Applications</div>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-green-600 mb-1">12</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Matches</div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-green-400 mb-1">12</div>
+                  <div className="text-xs text-gray-400">Matches</div>
                 </div>
               </div>
             </div>
@@ -192,7 +192,7 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
       </ContainerScroll>
 
       {/* Features Section */}
-      <section className="py-20 bg-white dark:bg-gray-900">
+      <section className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -201,11 +201,11 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Everything You Need for
               <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 bg-clip-text text-transparent"> University Success</span>
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               From discovery to enrollment, our AI-powered platform guides you through every step of your university journey.
             </p>
           </motion.div>
@@ -257,12 +257,12 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 viewport={{ once: true }}
                 className="group"
               >
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
                   <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
+                  <p className="text-gray-300 leading-relaxed">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -271,7 +271,7 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
       </section>
 
       {/* Success Stories Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800">
+      <section className="py-20 bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -280,11 +280,11 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Success Stories from
               <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 bg-clip-text text-transparent"> Our Students</span>
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Join thousands of students who achieved their dreams with EduVantage's AI-powered guidance.
             </p>
           </motion.div>
@@ -319,18 +319,18 @@ export function HeroScrollDemo({ onNavigate }: HeroScrollDemoProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 shadow-sm"
+                className="bg-gray-900 rounded-2xl p-8 border border-gray-700 shadow-sm"
               >
                 <div className="flex items-center mb-4">
                   {[...Array(story.rating)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-6 italic">"{story.quote}"</p>
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <div className="font-bold text-gray-900 dark:text-white">{story.name}</div>
-                  <div className="text-emerald-600 font-medium">{story.program}</div>
-                  <div className="text-gray-500 dark:text-gray-400 text-sm">{story.university}</div>
+                <p className="text-gray-300 mb-6 italic">"{story.quote}"</p>
+                <div className="border-t border-gray-700 pt-6">
+                  <div className="font-bold text-white">{story.name}</div>
+                  <div className="text-emerald-400 font-medium">{story.program}</div>
+                  <div className="text-gray-400 text-sm">{story.university}</div>
                 </div>
               </motion.div>
             ))}
